@@ -13,10 +13,8 @@
 ## 一键安装
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/claude-academic-config/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/dtq1997/claude-academic-config/main/install.sh | bash
 ```
-
-（把 `YOUR_USERNAME/claude-academic-config` 换成仓库实际地址）
 
 安装完后：
 

@@ -9,7 +9,7 @@
 set -euo pipefail
 
 # ---------- 配置 ----------
-REPO_URL="${REPO_URL:-https://github.com/YOUR_USERNAME/claude-academic-config.git}"
+REPO_URL="${REPO_URL:-https://github.com/dtq1997/claude-academic-config.git}"
 BRANCH="${BRANCH:-main}"
 LOCAL_SOURCE=""   # --local 模式用本地目录代替 git clone（调试用）
 INSTALL_DIR="${HOME}/.claude-academic-config"
