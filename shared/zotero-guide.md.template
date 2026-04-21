@@ -1,0 +1,145 @@
+# Zotero 文献库管理指南（模板）
+
+> 来源：基于原作者（数学方向）的 Zotero 管理实践脱敏。**标签体系需要你根据自己研究方向重建**。
+> 操作方式：Zotero 关闭后，直接用 SQLite 修改 `~/Zotero/zotero.sqlite`。
+
+## 0. 操作前提（所有方向通用）
+
+- **Zotero 必须关闭**（`ps aux | grep -i zotero` 确认无进程），否则 "database is locked"
+- 操作前备份：`cp ~/Zotero/zotero.sqlite ~/Zotero/zotero.sqlite.bak-$(date +%Y%m%d)`
+- 所有写操作走 SQLite（`sqlite3` 或 Python `sqlite3` 模块）
+- collections 表的 `key` 字段必填：8 位随机大写字母+数字
+- **严禁使用 `itemTypeID=14` (document) 插入任何条目** — 惨痛教训：Zotero UI 渲染 document 类型时 JS 崩溃（`getNote()`），导致 Quick Search 永远转圈。**正确 ID**：
+  - 条目用 `22=journalArticle, 7=book, 8=bookSection, 11=conferencePaper, 31=preprint, 37=thesis`
+  - 附件用 `3=attachment`（**不是 14**）
+
+## 1. 标签体系（请按你的方向重建）
+
+原作者的标签是按他的数学方向（Stokes / Painlevé / Frobenius / quantum groups 等）设计的 27 个 Title Case 标签。你需要替换为自己方向的标签。
+
+设计原则：
+- 按**数学对象 / 方法 / 理论**三类分
+- Title Case 命名
+- 一篇文献 1-4 个标签，允许交叉
+- 覆盖你当前和计划涉及的子领域
+
+示例结构（你替换内容）：
+
+```
+| 标签名 | 适用范围 |
+|--------|---------|
+| [对象类] | 比如 "Minimal Surfaces" / "Elliptic Curves" |
+| [方法类] | 比如 "Variational Methods" / "Spectral Theory" |
+| [理论类] | 比如 "Geometric Measure Theory" |
+```
+
+建议：先扫你当前 Zotero 库里已有的文献，按主题分组，自然形成标签。先列 15-25 个，用中再补。
+
+## 2. 文件夹结构（两级为限）
+
+一篇文献只放**一个**子文件夹。文件夹反映"最主要归属"，交叉由标签处理。
+
+典型两级结构：
+
+```
+顶级主题 A
+  ├─ 子主题 A1
+  ├─ 子主题 A2
+  └─ 子主题 A3
+顶级主题 B
+  ├─ ...
+Borderline — 跨界文献，无子文件夹
+Miscellaneous — 参考书/不相关，无子文件夹
+```
+
+## 3. 添加新文献的 SQL 模板（Python）
+
+```python
+import sqlite3, string, random, os, shutil
+from datetime import datetime
+
+def gen_key():
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+
+db = sqlite3.connect(os.path.expanduser("~/Zotero/zotero.sqlite"))
+
+# 1. 创建条目
+item_key = gen_key()
+db.execute("""
+    INSERT INTO items (itemTypeID, libraryID, key, version, synced, dateAdded, dateModified, clientDateModified)
+    VALUES (?, 1, ?, 0, 0, datetime('now'), datetime('now'), datetime('now'))
+""", (22, item_key))  # 22 = journalArticle
+item_id = db.execute("SELECT last_insert_rowid()").fetchone()[0]
+
+# 2. 元数据（fieldID: 1=title, 6=date, 38=publicationTitle, 59=DOI, 13=url, 19=volume, 76=issue, 32=pages, 2=abstractNote）
+# 对每个字段：先查 itemDataValues 是否已有 value，没有则插入，再写 itemData
+
+# 3. 作者（creatorTypeID: 8=author, 10=editor）
+# 对每个作者：先查 creators 是否存在，不在则插入，再写 itemCreators（orderIndex 控制顺序）
+
+# 4. 标签（按你的标签体系）
+# 对每个 tag_name：先查 tags，不在则插入，再写 itemTags（type=0 手动标签）
+
+# 5. 放入文件夹
+# 同时放入顶级 + 子文件夹 collectionID
+
+db.commit()
+db.close()
+```
+
+## 4. 附件 PDF 的正确做法
+
+```python
+# 附件 itemTypeID = 3 (attachment)！不是 14。
+att_key = gen_key()
+cur.execute("""
+    INSERT INTO items (itemTypeID, libraryID, key, version, synced, dateAdded, dateModified, clientDateModified)
+    VALUES (3, 1, ?, 0, 0, datetime('now'), datetime('now'), datetime('now'))
+""", (att_key,))
+att_id = cur.execute("SELECT last_insert_rowid()").fetchone()[0]
+
+cur.execute("""
+    INSERT INTO itemAttachments (itemID, parentItemID, linkMode, contentType, path, charsetID)
+    VALUES (?, ?, 0, 'application/pdf', ?, NULL)
+""", (att_id, parent_item_id, "storage:" + filename))
+
+# PDF 物理文件放到 ~/Zotero/storage/{att_key}/filename
+```
+
+## 5. itemTypeID 和 fieldID 速查
+
+| itemTypeID | typeName |
+|-----------|----------|
+| 22 | journalArticle |
+| 7  | book |
+| 11 | conferencePaper |
+| 8  | bookSection |
+| 37 | thesis |
+| 34 | report |
+| 31 | preprint |
+| 3  | attachment |
+
+| fieldID | fieldName |
+|---------|-----------|
+| 1 | title |
+| 2 | abstractNote |
+| 6 | date |
+| 13 | url |
+| 19 | volume |
+| 21 | place |
+| 23 | publisher |
+| 25 | ISBN |
+| 32 | pages |
+| 38 | publicationTitle |
+| 59 | DOI |
+| 76 | issue |
+
+## 6. 已知坑
+
+| 坑 | 防御 |
+|----|------|
+| 用了 `itemTypeID=14` (document) | 一律禁用，附件用 3，条目用 22/7/8/11/31/37 |
+| 忘关 Zotero 就改库 | 改之前先 `ps aux \| grep -i zotero` 确认无进程 |
+| 没备份直接改 | 每次改前 `cp zotero.sqlite zotero.sqlite.bak-日期` |
+| 同作者不同拼法导致作者拆分 | 先 `SELECT firstName, lastName FROM creators WHERE lastName LIKE '%姓%'` 去重检查 |
+| 标签大小写不一致 | Zotero 区分大小写，用 `COLLATE NOCASE` 查询去重 |
