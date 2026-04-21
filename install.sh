@@ -207,12 +207,12 @@ ok "版本已记录: $(cat "$VERSION_MARKER")"
 
 # ---------- 标记未完成的引导任务（供 claude 启动时自检） ----------
 mkdir -p "$HOME/ai/memory/unresolved"
-cat > "$HOME/ai/memory/unresolved/_bootstrap-pending.md" << 'EOF'
+cat > "$HOME/ai/memory/unresolved/_bootstrap-pending.md" << EOF
 # [bootstrap] 首次安装引导
 
 此文件由 install.sh 在 $(date '+%Y-%m-%d %H:%M:%S') 创建。
 
-Claude 下次启动时应检测此文件,按 `~/.claude-academic-config/bootstrap.md` 流程:
+Claude 下次启动时应检测此文件,按 \`~/.claude-academic-config/bootstrap.md\` 流程:
 - 问用户身份/研究方向,填充 ~/.claude/rules/identity.md 和 ~/ai/config/modes/academic.md
 - 问是否填写 API keys(~/ai/data/keys/api-keys.json)
 - 问是否现在装推荐 skills(见 ~/.claude-academic-config/skills-recommended.md)
