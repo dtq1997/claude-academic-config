@@ -14,7 +14,7 @@
 
 | 用户说 | 执行 |
 |--------|------|
-| "同步配置"/"更新配置"/"拉最新规则"/"检查配置更新" | `bash ~/.claude-academic-config/update.sh --check`，读 JSON → 用 AskUserQuestion 让用户选接受哪些 → `bash ~/.claude-academic-config/update.sh --apply [选中文件]` |
+| "同步配置"/"更新配置"/"拉最新规则"/"检查配置更新" | 1) 跑 `bash ~/.claude-academic-config/update.sh --check` 读 JSON;2) 自己判断变更是否安全(rules/shared/modes 常规更新直接 apply),给用户一句话概要"有 N 个文件更新,主要是 X";3) 只在探测到可能覆盖用户自定义、或变更语义不明时才用 AskUserQuestion 问一次(全部/部分/跳过);4) `bash ~/.claude-academic-config/update.sh --apply [files]` |
 | "看配置更新了什么"/"最近的 changelog" | `bash ~/.claude-academic-config/update.sh --changelog` |
 
 **多模式冲突解决：** 具体任务的模式规则优先于通用模式规则。

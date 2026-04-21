@@ -115,12 +115,18 @@ link_file "$INSTALL_DIR/modes/dialogue.md" "$HOME/ai/config/modes/dialogue.md"
 link_file "$INSTALL_DIR/modes/overnight.md" "$HOME/ai/config/modes/overnight.md"
 
 # shared/
-link_file "$INSTALL_DIR/shared/research-methodology.md" "$HOME/ai/memory/shared/research-methodology.md"
-link_file "$INSTALL_DIR/shared/academic-translation-workflow.md" "$HOME/ai/memory/shared/academic-translation-workflow.md"
-link_file "$INSTALL_DIR/shared/mathematica-nb-guide.md" "$HOME/ai/memory/shared/mathematica-nb-guide.md"
+for f in research-methodology academic-translation-workflow mathematica-nb-guide ai-usage-knowledge-base math-trivia multi-agent-collaboration; do
+  link_file "$INSTALL_DIR/shared/${f}.md" "$HOME/ai/memory/shared/${f}.md"
+done
+
+# skills/（种子包自带）
+mkdir -p "$HOME/.claude/skills"
+for s in mathematica-nb math-survey; do
+  link_file "$INSTALL_DIR/skills/${s}/skill.md" "$HOME/.claude/skills/${s}/skill.md"
+done
 
 # 顶层
-link_file "$INSTALL_DIR/api-index-academic.md" "$HOME/ai/data/keys/README.md"
+link_file "$INSTALL_DIR/api-index.md" "$HOME/ai/data/keys/README.md"
 link_file "$INSTALL_DIR/config-maintenance.md" "$HOME/ai/config/config-maintenance.md"
 
 ok "通用文件软链完成"
@@ -174,28 +180,22 @@ fi
 cp "$INSTALL_DIR/VERSION" "$VERSION_MARKER"
 ok "版本已记录: $(cat "$VERSION_MARKER")"
 
+# ---------- 标记未完成的引导任务（供 claude 启动时自检） ----------
+mkdir -p "$HOME/ai/memory/unresolved"
+cat > "$HOME/ai/memory/unresolved/_bootstrap-pending.md" << 'EOF'
+# [bootstrap] 首次安装引导
+
+此文件由 install.sh 在 $(date '+%Y-%m-%d %H:%M:%S') 创建。
+
+Claude 下次启动时应检测此文件,按 `~/.claude-academic-config/bootstrap.md` 流程:
+- 问用户身份/研究方向,填充 ~/.claude/rules/identity.md 和 ~/ai/config/modes/academic.md
+- 问是否填写 API keys(~/ai/data/keys/api-keys.json)
+- 问是否现在装推荐 skills(见 ~/.claude-academic-config/skills-recommended.md)
+- 全部完成后删除本文件
+
+原则:Claude 自己判断、全自动,只在必须人类决定时问,问也只给大略描述。
+EOF
+
 # ---------- 结尾 ----------
 echo
-ok "$(c_green '安装完成！')"
-echo
-cat << 'EOF'
-📋 接下来你需要做的：
-
-1. 填写个人信息：
-   编辑 ~/.claude/rules/identity.md        （你的身份、研究方向）
-   编辑 ~/ai/config/modes/academic.md      （你的研究方向关键词、当前论文）
-
-2. 填写 API keys（按需）：
-   编辑 ~/ai/data/keys/api-keys.json
-
-3. 重建 Zotero 标签体系：
-   编辑 ~/ai/memory/shared/zotero-guide.md （模板里的数学方向标签换成你自己的）
-
-4. 装推荐 skills：
-   进入 claude 后说"按 ~/.claude-academic-config/skills-recommended.md 装推荐的 skills"
-
-5. 以后想拉最新规则，直接在 claude 里说：
-   "更新配置"  或  "同步最新规则"
-
-验证：打开一个新的 claude 会话，说"今天心情不好"看是否自动进对话模式。
-EOF
+ok "$(c_green '安装完成！打开 claude 即可,会自动完成余下配置。')"
