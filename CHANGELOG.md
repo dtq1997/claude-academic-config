@@ -8,6 +8,8 @@
 
 ## 2026-04-22
 
+- `install.sh` / `update.sh`:自动 GitHub 镜像回退(ghfast.top → gh-proxy.com → ghproxy.com),国内网络不稳定也能装/更新;首次成功的镜像记到 `.mirror` 文件后续复用
+- `README.md`:一键安装给出海外/国内两个版本
 - `api-index.md`：替换原 `api-index-academic.md`，从 13 个学术 API 扩到 40+(含地图/天气/医学/图书/汉字/法律/植物等,去除个人 ID 脱敏)
 - `lib/multi_ai.py`：GPT/Gemini 统一调用底层库,secrets 路径用 `CLAUDE_SECRETS_PATH` 环境变量(默认 `~/ai/data/keys/api-keys.json`)
 - `tools/{books,medical,train,weather}/`：四个自包含 Python 工具(无第三方依赖),覆盖图书搜索、医学四件套(PubMed/ClinicalTrials/OpenFDA/MeSH)、12306 余票、天气全套

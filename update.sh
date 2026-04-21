@@ -32,7 +32,21 @@ latest_version() {
 }
 
 fetch_remote() {
-  git -C "$INSTALL_DIR" fetch origin "$BRANCH" 2>&1 | tail -3 >&2
+  # 优先用首次 clone 成功的镜像(写在 .mirror 文件里),失败再试其他
+  local mirror=""
+  [[ -f "$INSTALL_DIR/.mirror" ]] && mirror=$(cat "$INSTALL_DIR/.mirror")
+  local orig_url
+  orig_url=$(git -C "$INSTALL_DIR" remote get-url origin)
+  local mirrors=("$mirror" "" "https://ghfast.top/" "https://gh-proxy.com/" "https://ghproxy.com/")
+  for m in "${mirrors[@]}"; do
+    local try_url="${m}${orig_url}"
+    if git -C "$INSTALL_DIR" fetch "$try_url" "$BRANCH:refs/remotes/origin/$BRANCH" 2>&1 | tail -3 >&2; then
+      echo "${m}" > "$INSTALL_DIR/.mirror"
+      return 0
+    fi
+  done
+  echo "错误: 所有镜像 fetch 均失败" >&2
+  return 1
 }
 
 # ---------- --check 模式：生成 JSON 差异清单 ----------
@@ -96,8 +110,9 @@ cmd_apply() {
   fetch_remote
 
   if [[ $# -eq 0 ]]; then
-    echo "» 全部应用：pull 最新版本" >&2
-    git -C "$INSTALL_DIR" pull --ff-only origin "$BRANCH"
+    echo "» 全部应用：merge origin/$BRANCH" >&2
+    # fetch_remote 已经把 origin/$BRANCH 更新到最新,直接 merge
+    git -C "$INSTALL_DIR" merge --ff-only "origin/$BRANCH"
   else
     echo "» 部分应用：指定文件 $*" >&2
     # checkout 指定文件到最新版本（其他不动）

@@ -15,6 +15,15 @@ LOCAL_SOURCE=""   # --local 模式用本地目录代替 git clone（调试用）
 INSTALL_DIR="${HOME}/.claude-academic-config"
 VERSION_MARKER="${HOME}/.claude/.seed-version"
 
+# GitHub 镜像前缀列表（国内网络直连 github 不稳时逐个尝试）
+# 空串 = 直连;其余是公共代理,把原 URL 前缀拼在它们后面即可
+GH_MIRRORS=(
+  ""
+  "https://ghfast.top/"
+  "https://gh-proxy.com/"
+  "https://ghproxy.com/"
+)
+
 # ---------- 参数解析 ----------
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -63,7 +72,23 @@ else
     git -C "$INSTALL_DIR" pull --ff-only origin "$BRANCH"
   else
     [[ -d "$INSTALL_DIR" ]] && die "$INSTALL_DIR 已存在但不是 git 仓库，请先处理"
-    git clone --branch "$BRANCH" "$REPO_URL" "$INSTALL_DIR"
+    # 依次尝试直连和各镜像
+    cloned=0
+    for mirror in "${GH_MIRRORS[@]}"; do
+      url="${mirror}${REPO_URL}"
+      say "尝试: ${mirror:-直连 github}"
+      if git clone --depth 1 --branch "$BRANCH" "$url" "$INSTALL_DIR" 2>&1; then
+        # 把 remote 改回原始 URL(未来 pull 从同镜像取,或直连)
+        git -C "$INSTALL_DIR" remote set-url origin "$REPO_URL"
+        # 写入可用镜像,供 update.sh 复用
+        echo "${mirror}" > "$INSTALL_DIR/.mirror"
+        cloned=1
+        break
+      fi
+      warn "失败,尝试下一个"
+      [[ -d "$INSTALL_DIR" ]] && rm -rf "$INSTALL_DIR"
+    done
+    [[ $cloned -eq 1 ]] || die "所有镜像都失败,请检查网络或手动下载仓库 zip"
   fi
 fi
 ok "种子源就绪"

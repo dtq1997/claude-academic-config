@@ -12,9 +12,17 @@
 
 ## 一键安装
 
+**海外/梯子稳定**:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/dtq1997/claude-academic-config/main/install.sh | bash
 ```
+
+**国内直连(走 GitHub 镜像)**:
+```bash
+curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/dtq1997/claude-academic-config/main/install.sh | bash
+```
+
+(install.sh 内部会自动尝试多个镜像回退,拿到 install.sh 就能装成功。)
 
 安装完后：
 
