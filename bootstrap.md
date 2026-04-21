@@ -40,7 +40,9 @@
 **A1 全要:**
 - 问一句"你叫什么 + 做什么方向?"
 - 问一句"现在填 GPT / Gemini 的 API key 吗?还是以后?"(二选一)
+- 问一句"你有没有稳定能访问 GitHub、arXiv、OpenAlex 的梯子?"(二选一:有 / 没有)
 - 按回答填 identity.md、academic.md、api-keys.json
+- 若答"没有梯子":告诉他一句"找唐乾微信要梯子订阅和客户端,他手动发你",不自动装
 - 告诉他一句:"推荐 skills 想装时说'装 skills',我带你走 /plugin"
 - 完事,删 pending
 
