@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-04-22 (晚)
+
+- `bootstrap.md`:首启体验改为**向导模式** —— Claude 主动介绍 7 类模块能力,让用户选"全要/挑/先想想",而非上来问身份
+- `install.sh`:把 `tools/{books,medical,train,weather}` 和 `lib/multi_ai.py` 软链到 `~/ai/data/` 下,填补 api-index 引用空洞
+- `install.sh`:重装时如果 identity.md 已填就不再埋 `_bootstrap-pending.md`,避免已完成用户再走一次引导
+- `api-index.md`:1.5 节(墙内 CDP 工具)重写 —— 明确"种子不自带、需自建",并指向开箱即用的替代方案
+- `modes/academic/ai-math-workflow.md`:顶部加前置条件,说明 `ask_gpt/ask_gemini/ask_both` 需要先装 `multi-ai` MCP
+- `rules/startup.md`:journal/ 空目录时静默跳过
+
 ## 2026-04-22
 
 - `install.sh` / `update.sh`:自动 GitHub 镜像回退(ghfast.top → gh-proxy.com → ghproxy.com),国内网络不稳定也能装/更新;首次成功的镜像记到 `.mirror` 文件后续复用

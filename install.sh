@@ -150,6 +150,24 @@ for s in mathematica-nb math-survey; do
   link_file "$INSTALL_DIR/skills/${s}/skill.md" "$HOME/.claude/skills/${s}/skill.md"
 done
 
+# tools/（种子自带的零依赖 Python 工具,软链到 ~/ai/data/ 下,供 api-index 引用）
+for t in books medical train weather; do
+  if [[ -d "$INSTALL_DIR/tools/${t}" ]]; then
+    mkdir -p "$HOME/ai/data/${t}"
+    for f in "$INSTALL_DIR/tools/${t}"/*; do
+      [[ -f "$f" ]] && link_file "$f" "$HOME/ai/data/${t}/$(basename "$f")"
+    done
+  fi
+done
+
+# lib/（multi_ai.py 等公共库）
+if [[ -d "$INSTALL_DIR/lib" ]]; then
+  mkdir -p "$HOME/ai/data/lib"
+  for f in "$INSTALL_DIR/lib"/*.py; do
+    [[ -f "$f" ]] && link_file "$f" "$HOME/ai/data/lib/$(basename "$f")"
+  done
+fi
+
 # 顶层
 link_file "$INSTALL_DIR/api-index.md" "$HOME/ai/data/keys/README.md"
 link_file "$INSTALL_DIR/config-maintenance.md" "$HOME/ai/config/config-maintenance.md"
@@ -206,8 +224,11 @@ cp "$INSTALL_DIR/VERSION" "$VERSION_MARKER"
 ok "版本已记录: $(cat "$VERSION_MARKER")"
 
 # ---------- 标记未完成的引导任务（供 claude 启动时自检） ----------
+# 仅在 identity.md 仍是模板时埋 pending 标记(判断条件:还含 `## 用户：[姓名]`)
+# 已填好的用户重装时不会再被拉回 bootstrap 流程
 mkdir -p "$HOME/ai/memory/unresolved"
-cat > "$HOME/ai/memory/unresolved/_bootstrap-pending.md" << EOF
+if grep -q '^## 用户：\[姓名\]' "$HOME/.claude/rules/identity.md" 2>/dev/null; then
+  cat > "$HOME/ai/memory/unresolved/_bootstrap-pending.md" << EOF
 # [bootstrap] 首次安装引导
 
 此文件由 install.sh 在 $(date '+%Y-%m-%d %H:%M:%S') 创建。
@@ -215,11 +236,16 @@ cat > "$HOME/ai/memory/unresolved/_bootstrap-pending.md" << EOF
 Claude 下次启动时应检测此文件,按 \`~/.claude-academic-config/bootstrap.md\` 流程:
 - 问用户身份/研究方向,填充 ~/.claude/rules/identity.md 和 ~/ai/config/modes/academic.md
 - 问是否填写 API keys(~/ai/data/keys/api-keys.json)
-- 问是否现在装推荐 skills(见 ~/.claude-academic-config/skills-recommended.md)
 - 全部完成后删除本文件
 
 原则:Claude 自己判断、全自动,只在必须人类决定时问,问也只给大略描述。
 EOF
+  ok "已埋下首次引导标记"
+else
+  # 已填好,确保旧的 pending 不残留
+  rm -f "$HOME/ai/memory/unresolved/_bootstrap-pending.md"
+  ok "检测到 identity.md 已填充,跳过首次引导"
+fi
 
 # ---------- 结尾 ----------
 echo

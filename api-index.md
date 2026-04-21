@@ -14,25 +14,20 @@
 | OpenStreetMap/Nominatim | nominatim.openstreetmap.org | 否 | 🔜 | 全球地理编码，无需注册，限1次/秒 |
 | GeoNames | api.geonames.org | 是（免费） | 📋 | 全球地名数据库，1100万条 |
 
-## 1.5 生活与消费（围墙花园 CDP 直连）
+## 1.5 生活与消费（围墙花园 / 需自建 CDP）
 
-所有工具通过 `~/ai/data/chrome_cdp.py` 连接 headless Chrome，共用 debug profile。
+> ⚠️ 本节工具**不自带**。都需要通过本机 headless Chrome + CDP (`chrome_cdp.py`) 驱动并预先登录。种子包不包含这些脚本和 CDP 基建,用户自行搭建;未搭建时本节整段忽略。下面的清单仅作为"可以这样做"的参考,不是开箱可用。
 
-| 平台 | 需登录 | 状态 | 工具脚本 | 说明 |
-|------|--------|------|---------|------|
-| 大众点评 | 是 | ✅ 已验证 | `dianping/dianping_search.py` | 商户评分/评价数/人均/商圈 |
-| 小红书 | 是 | ❌ 已封号移除 | ~~`xhs/xhs_search.py`~~ | 2026-03-30 账号被封，工具已删 |
-| B站 | 部分 | ✅ 已验证 | `bilibili/bilibili_search.py` | 视频搜索/播放量/UP主 |
-| 豆瓣影视 | 否 | ✅ 已验证 | `douban/douban_search.py` | 电影评分/短评/评价人数 |
-| 12306 | 否 | ✅ 已验证 | `12306/train_search.py` | 余票查询（纯 API） |
-| 知乎 | 是 | ⏳ 待登录 | `zhihu/zhihu_search.py` | 问答/专栏/文章 |
-| 美团外卖 | 是 | ⏳ 待登录 | `meituan/meituan_search.py` | 外卖搜索/满减/配送 |
-| 淘宝 | 是 | ⏳ 待登录 | `taobao/taobao_search.py` | 商品/价格/销量 |
-| 京东 | 是 | ⏳ 待登录 | `jd/jd_search.py` | 商品/比价/评论 |
-| 携程 | 是 | ⏳ 待登录 | `ctrip/ctrip_search.py` | 酒店/航班 |
-| 链家 | 是 | ⏳ 待登录 | `lianjia/lianjia_search.py` | 租房/二手房 |
-| 闲鱼 | 是 | ⏳ 待登录 | `xianyu/xianyu_search.py` | 二手商品 |
-| 微信公众号 | 否 | ⏳ 搜狗入口 | `weixin/weixin_search.py` | 公众号文章搜索 |
+| 平台 | 登录 | 难度 | 说明 |
+|------|------|------|------|
+| 12306 | 否 | ✅ 自带 | `~/ai/data/train/` 纯 API,装完即用(install.sh 自动软链) |
+| 大众点评 / 美团 | 是 | 需自建 | 商户评分、外卖 |
+| B站 / 豆瓣影视 | 部分/否 | 需自建 | 视频、影视评分 |
+| 知乎 / 小红书 / 微信公众号 | 是 | 需自建 | 中文内容检索(小红书易封号) |
+| 淘宝 / 京东 / 闲鱼 | 是 | 需自建 | 电商、二手 |
+| 携程 / 链家 | 是 | 需自建 | 酒店机票、租房 |
+
+**替代方案(开箱即用):** 地理/POI/路线用高德 MCP(见第 1 节);图书用自带 `~/ai/data/books/`;医学用自带 `~/ai/data/medical/`;天气用自带 `~/ai/data/weather/`。
 
 ## 2. 学术与科研
 

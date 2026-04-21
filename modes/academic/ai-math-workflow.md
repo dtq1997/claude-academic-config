@@ -1,5 +1,7 @@
 # AI 辅助数学研究工作流
 
+> **前置条件:** 本文档提到的 `ask_gpt` / `ask_gemini` / `ask_both` 是 `multi-ai` MCP 工具。若尚未安装,Claude 无法直接调用;需先配置 MCP server(需要 GPT 和 Gemini 的 API key)。未安装时下面的工作流退化为"用户手动拷内容到外部窗口问"。
+
 ## 方法论来源
 
 基于以下顶级数学家的实际 AI 使用经验提炼（原文存于 `~/ai/workspace/academic/references/workflow/`）：
