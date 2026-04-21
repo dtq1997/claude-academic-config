@@ -1,1 +1,5 @@
 /.lake
+
+# Archon 运行时日志,不入版本控制
+memory/session-*.md
+memory/progress.md

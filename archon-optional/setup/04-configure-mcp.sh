@@ -48,7 +48,7 @@ else
     "lean-lsp": {
       "command": "node",
       "args": [
-        "/Users/dtq1997/ai/workspace/archon/tools/mcp-servers/lean-lsp/build/index.js"
+        "$HOME/ai/workspace/archon/tools/mcp-servers/lean-lsp/build/index.js"
       ],
       "env": {
         "LEANSEARCH_API": "https://leansearch.net/api"

@@ -26,7 +26,6 @@ _SECRETS_PATH = os.environ.get("CLAUDE_SECRETS_PATH") or os.path.expanduser("~/a
 _FALLBACK_MODELS = {"gemini": "gemini-3.1-pro", "gpt": "gpt-5.4"}
 
 # ── 代理：保留本地代理（Clash 等），海外中转站需要走代理才能连通 ──
-# 旧逻辑曾清理所有代理变量，导致 timicc/sssaicode 等域名 SSL 握手失败
 
 # ── SSL（全局共享） ──
 
@@ -205,7 +204,7 @@ def call_gpt(messages, *, model=None, timeout=None, on_chunk=None, on_thinking=N
         model = default_model("gpt")
 
     gpt_config = get_upstream('gpt')
-    url = gpt_config.get('base_url', 'https://code.newcli.com/codex/v1/responses')
+    url = gpt_config.get('base_url', 'https://api.openai.com/v1/responses')
     api_key = gpt_config.get('api_key', '')
     if not api_key:
         raise Exception("GPT 需要配置 upstreams.gpt.api_key")
@@ -215,12 +214,10 @@ def call_gpt(messages, *, model=None, timeout=None, on_chunk=None, on_thinking=N
 
     if is_responses_api:
         body_data = {"model": model, "input": messages, "stream": True}
-        if "newcli.com" in url:
-            body_data["reasoning"] = {"effort": "high"}
+        body_data["reasoning"] = {"effort": "high"}
     else:
         body_data = {"model": model, "messages": messages, "stream": True}
-        if "newcli.com" in url:
-            body_data["reasoning_effort"] = "high"
+        body_data["reasoning_effort"] = "high"
 
     body = json.dumps(body_data).encode()
     req = urllib.request.Request(url, data=body, headers={
@@ -328,7 +325,7 @@ def call_gemini(contents, *, model=None, timeout=None):
         model = default_model("gemini")
 
     gemini_config = get_upstream('gemini')
-    base_url = _gemini_endpoint(gemini_config.get('base_url', 'https://code.newcli.com/gemini/v1beta/models'))
+    base_url = _gemini_endpoint(gemini_config.get('base_url', 'https://generativelanguage.googleapis.com/v1beta/models'))
     api_key = gemini_config.get('api_key', '')
     if not api_key:
         raise Exception("Gemini 需要配置 upstreams.gemini.api_key")
@@ -373,7 +370,7 @@ def call_gemini_image(prompt, *, model="gemini-3-pro-image"):
     """
     _reload_if_changed()
     gemini_config = get_upstream('gemini')
-    base_url = _gemini_endpoint(gemini_config.get('base_url', 'https://code.newcli.com/gemini/v1beta/models'))
+    base_url = _gemini_endpoint(gemini_config.get('base_url', 'https://generativelanguage.googleapis.com/v1beta/models'))
     api_key = gemini_config.get('api_key', '')
     if not api_key:
         raise Exception("Gemini 需要配置 upstreams.gemini.api_key")
@@ -554,7 +551,7 @@ def sync_downstream(upstreams=None):
             if preserved:
                 parts.extend(preserved)
             else:
-                parts.append('[projects."/Users/dtq1997"]')
+                parts.append(f'[projects."{os.path.expanduser("~")}"]')
                 parts.append('trust_level = "trusted"')
             parts.append('')
 
